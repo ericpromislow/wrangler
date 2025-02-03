@@ -7,6 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/rancher/wrangler/v3/pkg/data"
+	"github.com/sirupsen/logrus"
 )
 
 func GetUnstructuredConditions(obj map[string]interface{}) []Condition {
@@ -74,9 +75,11 @@ func NormalizeConditions(runtimeObj runtime.Object) {
 		obj           data.Object
 		newConditions []map[string]interface{}
 	)
+	logrus.Infof("QQQ: >> wrangler summary.NormalizeConditions")
 
 	unstr, ok := runtimeObj.(*unstructured.Unstructured)
 	if !ok {
+		logrus.Infof("QQQ: << can't cast runtimeObj to u.U")
 		return
 	}
 
@@ -88,9 +91,12 @@ func NormalizeConditions(runtimeObj runtime.Object) {
 		}
 		condition.Set("error", summary.Error)
 		condition.Set("transitioning", summary.Transitioning)
+		logrus.Infof("QQQ: set conditions error and trans to %v, %v", summary.Error, summary.Transitioning)
 
 		if condition.String("lastUpdateTime") == "" {
 			condition.Set("lastUpdateTime", condition.String("lastTransitionTime"))
+
+			logrus.Infof("QQQ: set condition lastUpdateTime to %s", condition.String("lastTransitionTime"))
 		}
 		newConditions = append(newConditions, condition)
 	}
