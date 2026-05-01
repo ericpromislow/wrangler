@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-
 	"github.com/rancher/wrangler/v3/pkg/schemas"
 	"github.com/rancher/wrangler/v3/pkg/summary"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -112,7 +111,11 @@ func (c *summaryResourceClient) Watch(ctx context.Context, opts metav1.ListOptio
 			if _, ok := event.Object.(*metav1.Status); !ok {
 				event.Object = summary.SummarizedWithOptions(event.Object, generateSummarizeOpts(c.options.Schema))
 			}
-			eventChan <- event
+			select {
+			case eventChan <- event:
+			case <-ctx.Done():
+				return
+			}
 		}
 	}()
 
